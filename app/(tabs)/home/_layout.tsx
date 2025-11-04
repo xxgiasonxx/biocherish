@@ -13,7 +13,7 @@ export default function Layout() {
   return (
     <Stack
       screenOptions={{
-        headerBackButtonMenuEnabled: true,
+        // headerBackButtonMenuEnabled: true,
         headerBackButtonDisplayMode: 'generic',
         headerStyle: {
           backgroundColor: color.TabbarBg,
@@ -27,7 +27,7 @@ export default function Layout() {
           return (
             <>
               {/* <Icon fill={color.TabbarColor} width={24} height={24} /> */}
-              <MaterialCommunityIcons name="mushroom" size={24} color={color.TabbarColor} style={{ marginRight: 8 }} />
+              {/* <MaterialCommunityIcons name="mushroom" size={24} color={color.TabbarColor} style={{ marginRight: 8 }} /> */}
               <Text style={{ color: color.TabbarColor, fontSize: 18, fontWeight: 'bold' }}>{props.children}</Text>
             </>
           );
@@ -43,7 +43,7 @@ export default function Layout() {
       <Stack.Screen name="newEdge" options={{
         title: '新增邊緣',
       }} />
-      {/* <StatusBar style="auto" /> */}
+      <StatusBar style="auto" />
     </Stack>
   );
 }

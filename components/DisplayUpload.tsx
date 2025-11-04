@@ -12,7 +12,7 @@ export type DisplayUploadProps = {
     displayState: DisplayStateProps;
 }
 
-type DisplayStateProps = {
+export type DisplayStateProps = {
     state: BioStateType;
     stateText: string;
     description: string;

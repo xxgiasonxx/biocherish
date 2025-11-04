@@ -65,7 +65,7 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
                                 <TextInput
                                     keyboardType="default"
                                     className=""
-                                    inputMode='decimal'
+                                    inputMode={item.type === 'number' ? 'numeric' : 'text'}
                                     value={String(inputs[index].values)}
                                     onChangeText={(text) => updateInput(index, text)}
                                     style={{ color: color.TextColor }}
