@@ -1,12 +1,13 @@
-import { useContext } from 'react';
-import { Platform, View, ScrollView } from 'react-native';
-import { ThemeContext } from '@/components/providers/ThemeProviders';
+import { Platform, View } from 'react-native';
 import { Main } from '@/components/Main';
 import { Section } from '@/components/Section';
 import { Card, CardProps } from '@/components/Card';
 import { SymbolView } from 'expo-symbols';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router'
+import { cssInterop } from 'nativewind';
+
+
 
 const cardList: CardProps[] = [
   {
@@ -62,7 +63,6 @@ const cardList: CardProps[] = [
 // import { SafeAreaView } from 'react-native-safe-area-context';
 // --- Main Component ---
 function HomePage() {
-  const { color } = useContext(ThemeContext);
 
   return (
     // <View className={`flex-1 bg-[${color.Background}] w-full justify-center items-center`}>
@@ -78,7 +78,7 @@ function HomePage() {
         }
       }> */}
 
-        <Main bgColor={color.Background}>
+        <Main>
           <Section>
               {cardList.map((card, index) => (
                 <Card key={index} id={card.id} title={card.title} state={card.state} stateText={card.stateText} lastModified={card.lastModified} lastDetected={card.lastDetected} />
@@ -89,16 +89,16 @@ function HomePage() {
       {/* </ScrollView> */}
 
       <View className='absolute right-2 bottom-[13vh] flex items-center justify-center gap-3'>
-        <View className='flex items-center justify-center rounded-3xl shadow-lg p-2' style={{ backgroundColor: color.PrimaryBtnColor }}>
+        <View className='flex items-center justify-center rounded-3xl shadow-lg p-2 bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor'>
           {Platform.select({
-            ios: <SymbolView name="plus" size={50} weight="bold" scale="large" colors={color.TextIconColor} />,
-            android: <MaterialIcons name="integration-instructions" size={50} color={color.TextIconColor} />,
+            ios: <SymbolView name="plus" size={50} weight="bold" scale="large" className='text-TextIconColor dark:text-DarkTextIconColor' />,
+            android: <MaterialIcons name="integration-instructions" size={50} className='text-TextIconColor dark:text-DarkTextIconColor' />,
           })}
         </View>
-        <Link href={"/home/newEdge"} className='flex items-center justify-center rounded-3xl shadow-lg p-2 cursor-pointer' style={{ backgroundColor: color.PrimaryBtnColor }}>
+        <Link href={"/home/newEdge"} className='flex items-center justify-center rounded-3xl shadow-lg p-2 cursor-pointer bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor'>
           {Platform.select({
-            ios: <SymbolView name="plus" size={50} weight="bold" scale="large" colors={color.TextIconColor} />,
-            android: <MaterialCommunityIcons name="plus-circle-outline" size={50} color={color.TextIconColor} />,
+            ios: <SymbolView name="plus" size={50} weight="bold" scale="large" className='text-TextIconColor dark:text-DarkTextIconColor' />,
+            android: <MaterialCommunityIcons name="plus-circle-outline" size={50} className='text-TextIconColor dark:text-DarkTextIconColor' />,
           })}
         </Link>
       </View>
@@ -108,3 +108,21 @@ function HomePage() {
 };
 
 export default HomePage;
+
+cssInterop(MaterialIcons, {
+  className: {
+    target: 'style',
+  },
+});
+
+cssInterop(MaterialCommunityIcons, {
+  className: {
+    target: 'style',
+  },
+});
+
+cssInterop(SymbolView, {
+  className: {
+    target: 'style',
+  },
+});

@@ -1,7 +1,5 @@
 import { View, Text, Image, Pressable } from 'react-native';
-import { useContext, useEffect, useState } from 'react';
-import { ThemeContext } from '@/components/providers/ThemeProviders';
-import { FontAwesome6 } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { TitleBar } from '@/components/TitleBar';
 import { BioState, BioStateType } from '@/components/BioState';
 import { formatDate } from '@/lib/time';
@@ -30,16 +28,12 @@ type ChoiceImageProps = {
 
 
 export function DisplayUpload({ title, displayState }: DisplayUploadProps) {
-    const { color } = useContext(ThemeContext);
     const uri = 'https://placehold.co/600x400.png';
     const AIuri = 'https://placehold.co/700x800.png';
 
     return (
         <View 
-        className='flex flex-col w-full items-center justify-start rounded-3xl gap-2 p-6'
-        style={{
-            backgroundColor: color.BoxBackground,
-        }}
+        className='flex flex-col w-full items-center justify-start rounded-3xl gap-2 p-6 bg-BoxBackground dark:bg-DarkBoxBackground'
         >
 
             {/* title bar */}
@@ -56,7 +50,6 @@ export function DisplayUpload({ title, displayState }: DisplayUploadProps) {
 }
 
 function ChoiceImage({ uri, AIuri }: ChoiceImageProps) {
-    const { color } = useContext(ThemeContext);
     const [selected, setSelected] = useState<number>(1);
     const [ratio, setRatio] = useState<number>(1);
 
@@ -86,15 +79,10 @@ function ChoiceImage({ uri, AIuri }: ChoiceImageProps) {
                     onPress={() => {
                         setSelected(0);
                     }}
-                    className='flex-1 items-center py-2 px-4 rounded-3xl'
-                    style={{
-                        backgroundColor: selected === 0 ? color.ActiveColor : color.SecBtnColor,
-                    }}>
+                    className={'flex-1 items-center py-2 px-4 rounded-3xl ' + (selected === 0 ? 'bg-ActiveColor' : 'bg-SecBtnColor dark:bg-DarkSecBtnColor')}
+                    >
                     <Text
-                        className='font-bold text-[20px]'
-                        style={{
-                            color: color.TextColor,
-                        }}
+                        className='font-bold text-[20px] text-TextColor dark:text-DarkTextColor'
                     >
                         原圖
                     </Text>
@@ -103,15 +91,10 @@ function ChoiceImage({ uri, AIuri }: ChoiceImageProps) {
                     onPress={() => {
                         setSelected(1);
                     }}
-                    className='flex-1 items-center py-2 px-4 rounded-3xl'
-                    style={{
-                        backgroundColor: selected === 1 ? color.ActiveColor : color.SecBtnColor,
-                    }}>
+                    className={'flex-1 items-center py-2 px-4 rounded-3xl ' + (selected === 1 ? 'bg-ActiveColor' : 'bg-SecBtnColor dark:bg-DarkSecBtnColor')}
+                    >
                     <Text
-                        className='font-bold text-[20px]'
-                        style={{
-                            color: color.TextColor,
-                        }}
+                        className='font-bold text-[20px] text-TextColor dark:text-DarkTextColor'
                     >
                         AI 偵測圖
                     </Text>
@@ -125,7 +108,6 @@ export type DisplayStateType = 'obj' | 'text' | 'round';
 
 
 function DisplayState(props: DisplayStateProps) {
-    const { color } = useContext(ThemeContext);
 
     const titleLists: {
         title: string,
@@ -151,8 +133,8 @@ function DisplayState(props: DisplayStateProps) {
                         <View key={index} className="flex-1 flex-row w-full items-start justify-start">
                             <View className="flex flex-col h-full items-center justify-center">
                                 <Text
-                                    className="text-xl font-medium text-start"
-                                    style={{ color: color.TextColor }}>
+                                    className="text-xl font-medium text-start text-TextColor dark:text-DarkTextColor"
+                                    >
                                     {item.title}
                                 </Text>
                             </View>
@@ -169,8 +151,7 @@ function DisplayState(props: DisplayStateProps) {
 
                                 {item.type === 'text' && (
                                     <Text
-                                        className="px-3 font-normal text-center"
-                                        style={{ color: color.TextColor }}
+                                        className="px-3 font-normal text-center text-TextColor dark:text-DarkTextColor"
                                     >
                                         {item.state ?? "無資料"}
                                     </Text>
@@ -178,12 +159,10 @@ function DisplayState(props: DisplayStateProps) {
 
                                 {item.type === 'round' && (
                                     <View
-                                        className="flex w-full items-center justify-center rounded-3xl"
-                                        style={{ backgroundColor: color.SecBtnColor }}
+                                        className="flex w-full items-center justify-center rounded-3xl bg-SecBtnColor dark:bg-DarkSecBtnColor"
                                     >
                                         <Text
-                                            className=""
-                                            style={{ color: color.TextColor }}
+                                            className="text-TextColor dark:text-DarkTextColor"
                                         >
                                             {item.state ?? "無資料"}
                                             {item.title.includes('溫度') && item.state && ` °C`}

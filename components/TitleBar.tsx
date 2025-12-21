@@ -1,14 +1,13 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
-import { ThemeContext } from "@/components/providers/ThemeProviders";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { cssInterop } from "nativewind";
 
 type TitleBarProps = {
     title: string;
 }
 
 export function TitleBar({ title }: TitleBarProps) {
-  const { color } = useContext(ThemeContext);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTitle, setCurrentTitle] = useState(title);
 
@@ -21,19 +20,11 @@ export function TitleBar({ title }: TitleBarProps) {
             onChangeText={setCurrentTitle}
             onBlur={() => setIsEditing(false)} // 失焦結束編輯
             autoFocus
-            style={{
-              color: color.TextColor,
-              fontSize: 24,
-              fontWeight: "bold",
-              borderBottomWidth: 1,
-              borderBottomColor: color.TextColor,
-              marginBottom: 6,
-            }}
+            className="text-[24px] font-bold border-b-2 border-TextColor dark:border-DarkTextColor mb-2 text-TextColor dark:bg-DarkTextColor"
           />
         ) : (
           <Text
-            className="text-[24px] font-bold"
-            style={{ color: color.TextColor }}
+            className="text-[24px] font-bold text-TextColor dark:text-DarkTextColor"
             onPress={() => setIsEditing(true)} // 點文字也能進入編輯模式
           >
             {currentTitle}
@@ -45,9 +36,15 @@ export function TitleBar({ title }: TitleBarProps) {
         <FontAwesome6
           name="edit"
           size={20}
-          color={color.TextIconColor}
+          className="text-TextIconColor dark:text-DarkTextIconColor"
         />
       </Pressable>
     </View>
   );
 }
+
+cssInterop(FontAwesome6, {
+  className: {
+    target: 'style',
+  },
+});

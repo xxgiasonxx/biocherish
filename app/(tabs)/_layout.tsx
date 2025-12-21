@@ -25,6 +25,7 @@ export default function TabLayout() {
       }
       indicatorColor={color.ActiveColor}
       labelVisibilityMode='selected'
+      minimizeBehavior="onScrollDown"
     >
 
       <NativeTabs.Trigger name='home'>

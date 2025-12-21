@@ -1,7 +1,6 @@
 
 import { View, Text, Pressable } from 'react-native';
-import { useState, useContext } from 'react';
-import { ThemeContext } from '@/components/providers/ThemeProviders';
+import { useState } from 'react';
 
 type SelectBarProps = {
     barItems: string[];
@@ -12,7 +11,6 @@ type SelectBarProps = {
 
 
 export function SelectBar({ barItems, onSelect }: SelectBarProps) {
-    const { color } = useContext(ThemeContext)
     const [selected, setSelected] = useState<number>(0);
 
     return (
@@ -27,15 +25,10 @@ export function SelectBar({ barItems, onSelect }: SelectBarProps) {
                             setSelected(index); 
                             onSelect(index); 
                         }}
-                        className='flex py-3 px-4 rounded-3xl'
-                        style={{
-                            backgroundColor: isSelected ? color.ActiveColor : color.SecBtnColor,
-                        }}>
+                        className={`flex py-3 px-4 rounded-3xl ` + (isSelected ? 'bg-ActiveColor' : 'bg-SecBtnColor dark:bg-DarkSecBtnColor')}
+                        >
                         <Text
-                            className='font-bold text-[20px]'
-                            style={{
-                                color: color.TextColor
-                            }}
+                            className='font-bold text-[20px] text-TextColor dark:text-DarkTextColor'
                         >
                             {item}
                         </Text>

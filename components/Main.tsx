@@ -28,10 +28,7 @@ export function Main({ children, bgColor }: MainProps) {
                 justifyContent: 'center',
                 paddingBottom: 100,
             }}
-            className="flex-1 flex-col"
-            style={{ 
-                backgroundColor: bgColor 
-            }}
+            className="flex-1 flex-col bg-Background dark:bg-DarkBackground"
         >
             {children}
         </ScrollView>

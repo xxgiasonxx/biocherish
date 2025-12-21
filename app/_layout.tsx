@@ -1,40 +1,46 @@
 import '../global.css';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
-import { ThemeProvider, ThemeContext } from '@/components/providers/ThemeProviders';
+import { ThemeProvider} from '@/components/providers/ThemeProviders';
+import { AuthProvider, useAuth } from '@/components/providers/AuthProviders';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useContext } from 'react';
 // import { View } from 'react-native';
 
-export default function Layout() {
-  const { color } = useContext(ThemeContext);
-
+export default function App() {
   return (
     <ThemeProvider>
       <SafeAreaProvider>
-        <StatusBar style="auto" />
-        <Stack
-          // screenOptions={{
-          //   headerBackButtonMenuEnabled: true,
-          //   headerBackButtonDisplayMode: 'generic',
-          //   headerStyle: {
-          //     backgroundColor: color.TabbarBg,
-          //   },
-          //   headerTitleStyle: {
-          //     color: color.TabbarColor,
-          //   },
-          //   headerTintColor: color.TabbarColor,
-          //   headerTitleAlign: 'center',
-          // }}
-        >
-          <Stack.Screen name="(tabs)" options={{
-            headerShown: false
-          }} />
-          {/* <Stack.Screen name="SignIn" options={{ title: '登入' }} /> */}
-          {/* <Stack.Screen name="SignUp" options={{ title: '註冊' }} /> */}
-          {/* <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} /> */}
-        </Stack>
+        <AuthProvider>
+          <Layout />
+        </AuthProvider>
       </SafeAreaProvider>
     </ThemeProvider>
+  );
+}
+
+export const Layout = () => {
+  const { authState } = useAuth();
+
+  return (
+    <>
+      <StatusBar style="auto" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        {
+          authState?.authenticated ? (
+            <Stack.Screen name="(tabs)" options={{
+              headerShown: false
+            }} />
+          ) : (
+              <Stack.Screen name="SignIn" options={{ 
+                headerShown: false,
+              }} />
+          )
+        }
+      </Stack>
+    </>
   );
 }

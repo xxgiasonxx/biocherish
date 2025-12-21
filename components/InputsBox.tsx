@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput } from 'react-native';
 import { Box } from "@/components/Box";
-import { ThemeContext } from '@/components/providers/ThemeProviders';
 
 export type InputsType = {
     title: string;
@@ -16,7 +15,6 @@ type InputsBoxProps = {
 }
 
 export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
-    const { color } = useContext(ThemeContext)
     // 初始化 state
     const [inputs, setInputs] = useState<InputsType[]>(needed);
 
@@ -35,8 +33,7 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
         <Box padding={20} gap={10}>
             <View className="flex w-full flex-col items-start">
                 <Text
-                    className="text-2xl font-bold text-start"
-                    style={{ color: color.TextColor }}
+                    className="text-2xl font-bold text-start text-TextColor dark:text-DarkTextColor"
                 >
                     {BigTitle}
                 </Text>
@@ -50,27 +47,26 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
                     >
                         <View className="flex flex-col h-full items-center justify-center">
                             <Text
-                                className="text-xl font-medium text-start"
-                                style={{ color: color.TextColor }}
+                                className="text-xl font-medium text-start text-TextColor dark:text-DarkTextColor"
                             >
                                {item.title} 
                             </Text>
                         </View>
 
                         <View className="flex-1 flex-row h-full items-center justify-start">
-                            <View
+                            {/* <View
                                 className="flex w-full items-center justify-center rounded-3xl"
                                 style={{ backgroundColor: color.SecBtnColor }}
-                            >
+                            > */}
                                 <TextInput
                                     keyboardType="default"
-                                    className=""
+                                    className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor"
+                                    
                                     inputMode={item.type === 'number' ? 'numeric' : 'text'}
                                     value={String(inputs[index].values)}
                                     onChangeText={(text) => updateInput(index, text)}
-                                    style={{ color: color.TextColor }}
                                 />
-                            </View>
+                            {/* </View> */}
                         </View>
                     </View>
                 ))}

@@ -13,14 +13,13 @@ import { InputsBox, InputsType } from '@/components/InputsBox';
 // --- Main Component ---
 function DetailPage() {
   const { id } = useLocalSearchParams(); // 取得路由參數
-  const { color } = useContext(ThemeContext);
   const [selectedValue, setSelectedValue] = useState<number>(0);
   const page: string[] = ['最近上傳', '紀錄', '裝置設定'];
 
 
   return (
     // <View className={`flex-1 bg-[${color.Background}] w-full justify-center items-center`}>
-    <Main bgColor={color.Background}>
+    <Main>
       <Section>
           {/* toggle bar*/}
          <SelectBar

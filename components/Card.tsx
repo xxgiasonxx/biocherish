@@ -1,7 +1,5 @@
 import { View, Text, Image, Pressable } from "react-native";
-import { Link, router } from "expo-router";
-import { useContext } from "react";
-import { ThemeContext } from "@/components/providers/ThemeProviders";
+import { router } from "expo-router";
 // import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { BioState } from "@/components/BioState";
 import { TitleBar } from "@/components/TitleBar";
@@ -18,11 +16,9 @@ export type CardProps = {
 }
 
 export function Card({ id, title, imageurl, state, stateText, lastModified, lastDetected }: CardProps) {
-    const { color } = useContext(ThemeContext);
-
     return (
         <Pressable onPress={() => router.push(`/home/${id}`)}>
-            <View className={`flex flex-row min-h-48 w-full justify-between items-center rounded-[20px] shadow p-[15px]`} style={{ backgroundColor: color.BoxBackground }}>
+            <View className={`flex flex-row min-h-48 w-full justify-between items-center rounded-[20px] shadow p-[15px] bg-BoxBackground dark:bg-DarkBoxBackground`}>
                 <View className="flex flex-col items-start justify-start px-[10px]">
                     {/* <View className="flex-1 w-full flex-row items-start justify-start gap-[10px]">
                     <View className="flex justify-center h-full">
@@ -43,11 +39,11 @@ export function Card({ id, title, imageurl, state, stateText, lastModified, last
                         </View>
                     </View>
                     <View className="flex-1 flex-col items-center justify-end">
-                        <Text className="w-full font-bold text-xs" style={{ color: color.OpcTextColor }}>
+                        <Text className="w-full font-bold text-xs text-OpcTextColor dark:text-DarkOpcTextColor">
                             上次修改時間：{lastModified}
                         </Text>
 
-                        <Text className="w-full font-bold text-xs" style={{ color: color.OpcTextColor }}>
+                        <Text className="w-full font-bold text-xs text-OpcTextColor dark:text-DarkOpcTextColor">
                             上次偵測時間：{lastDetected}
                         </Text>
                     </View>
