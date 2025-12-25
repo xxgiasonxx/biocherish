@@ -3,10 +3,10 @@ import { States } from "@/constants/theme";
 
 export type BioStateProps = {
     text: string;
-    state: 'good' | 'careful' | 'wrong' | 'unknown';
+    state: 'good' | 'warning' | 'unknown';
 };
 
-export type BioStateType = 'good' | 'careful' | 'wrong' | 'unknown';
+export type BioStateType = 'good' | 'warning' | 'unknown';
 
 export function BioState({ text, state }: BioStateProps) {
     return (

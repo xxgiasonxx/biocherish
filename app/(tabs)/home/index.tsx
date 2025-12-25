@@ -6,85 +6,72 @@ import { SymbolView } from 'expo-symbols';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router'
 import { cssInterop } from 'nativewind';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 
 
-const cardList: CardProps[] = [
-  {
-    id: "1203982109318230918",
-    title: '菌瓶 A-01',
-    state: 'good',
-    stateText: '菌絲健康',
-    lastModified: '2025/10/25 下午 03:57',
-    lastDetected: '2025/10/25 下午 03:57',
-  },
-  {
-    id: "1203982109318230919",
-    title: '菌瓶 B-02',
-    state: 'careful',
-    stateText: '小心',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230920",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230921",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230922",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230923",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-];
-
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// --- Main Component ---
 function HomePage() {
+  const [cardList, setCardList] = useState<CardProps[]>([]);
+
+  // useEffect(() => {
+  //   const fetchCardList = async () => {
+  //     try {
+  //       const response = await axios.get(`${API_URL}/bottle`);
+
+  //       if (response.status !== 200) {
+  //         console.error('Failed to fetch card list:', response.status);
+  //         return;
+  //       }
+
+  //       response.data?.bottles?.forEach((bottle: CardProps) => {
+  //         setCardList(prevList => [...prevList, bottle]);
+  //       });
+      
+  //     } catch (error) {
+  //       console.error('Error in fetchCardList:', error);
+  //     }
+  //   };
+  //   fetchCardList();
+  // }, []);
+
+  useEffect(() => {
+    setCardList([
+      {
+        id: '1',
+        name: '菌瓶 A',
+        bottle_status: 'good',
+        bottle_status_text: '一切正常',
+        env_status: "good",
+        env_status_text: 'dasjkda',
+        isConnected: true,
+        imageurl: 'https://placehold.co/600x400.png',
+        edited_at: 1711929600000,
+        scanned_at: 1712016000000,
+      },
+    ]);
+  }, []);
 
   return (
-    // <View className={`flex-1 bg-[${color.Background}] w-full justify-center items-center`}>
-    // <SafeAreaView>
     <>
-      {/* <ScrollView
-      style={{ flex: 1}}
-       contentContainerStyle={
-        {
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingBottom: 100
-        }
-      }> */}
-
-        <Main>
-          <Section>
-              {cardList.map((card, index) => (
-                <Card key={index} id={card.id} title={card.title} state={card.state} stateText={card.stateText} lastModified={card.lastModified} lastDetected={card.lastDetected} />
-              ))}
-          </Section>
-        </Main>
+      <Main>
+        <Section>
+            {cardList.map((card, index) => (
+              <Card key={index} {...card} />
+            ))}
+            {
+              cardList.length === 0 && (
+                <View className='flex items-center justify-center py-10'>
+                  <MaterialIcons name="cloud-off" size={50} className='text-TextIconColor dark:text-DarkTextIconColor mb-4' />
+                  <View className='text-TextColor dark:text-DarkTextColor'>尚無任何菌瓶資料，請點擊右下角按鈕新增。</View>
+                </View>
+              )
+            }
+        </Section>
+      </Main>
 
       {/* </ScrollView> */}
 

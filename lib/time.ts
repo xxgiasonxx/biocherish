@@ -6,10 +6,10 @@
 */
 
 export const formatDate = (
-    date: Date | string = new Date(),
+    date: number,
     format = 'YYYY-MM-DD HH:mm:ss'
 ): string => {
-    const targetDate = typeof date === 'string' ? new Date(date) : date;
+    const targetDate = new Date(date);
 
     // 处理无效日期
     if (isNaN(targetDate.getTime())) return 'Invalid Date';

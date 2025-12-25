@@ -23,6 +23,9 @@ export default function TabLayout() {
       tintColor={
         color.TabbarColor
       }
+      iconColor={
+        color.TabbarColor
+      }
       indicatorColor={color.ActiveColor}
       labelVisibilityMode='selected'
       minimizeBehavior="onScrollDown"
@@ -43,6 +46,11 @@ export default function TabLayout() {
       <NativeTabs.Trigger name='uploads'>
         <Label>uploads</Label>
         <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} drawable='ic_menu_report_image' />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name='settings'>
+        <Label>settings</Label>
+        <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} src={{ default: <VectorIcon family={MaterialIcons} name='settings' />, selected: <VectorIcon family={MaterialIcons} name='settings' /> }} />
       </NativeTabs.Trigger>
 
     </NativeTabs>

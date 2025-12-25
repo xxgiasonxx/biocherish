@@ -19,7 +19,6 @@ export default function App() {
 }
 
 export const Layout = () => {
-  const { authState } = useAuth();
 
   return (
     <>
@@ -29,18 +28,36 @@ export const Layout = () => {
           headerShown: false,
         }}
       >
-        {
-          authState?.authenticated ? (
-            <Stack.Screen name="(tabs)" options={{
-              headerShown: false
-            }} />
-          ) : (
-              <Stack.Screen name="SignIn" options={{ 
-                headerShown: false,
-              }} />
-          )
-        }
+        <Content />
       </Stack>
     </>
+  );
+}
+
+
+const Content = () => {
+  const { authState, isLoading } = useAuth();
+  console.log("Layout authState:", authState?.authenticated);
+
+  if (isLoading) {
+    return (
+      <Stack.Screen name="Loading" options={{
+        headerShown: false
+      }} />
+    );
+  }
+
+  if (!authState?.authenticated) {
+    return (
+      <Stack.Screen name="SignIn" options={{
+        headerShown: false
+      }} />
+    );
+  }
+  
+  return (
+    <Stack.Screen name="(tabs)" options={{
+      headerShown: false
+    }} />
   );
 }

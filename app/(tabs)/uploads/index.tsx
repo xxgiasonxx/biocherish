@@ -11,8 +11,8 @@ import { cssInterop } from 'nativewind';
 // --- Main Component ---
 function UploadPage() {
   const [inputs, setInputs] = useState<InputsType[]>([
-    { title: '溫度 (°C):', type: 'number', values: '' },
-    { title: '濕度 (%RH):', type: 'number', values: '' },
+    { title: '溫度 (°C):', type: 'number', values: '', setting: false },
+    { title: '濕度 (%RH):', type: 'number', values: '', setting: false },
   ]);
   const [image, setImage] = useState<string | null>(null);
 

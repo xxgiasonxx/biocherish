@@ -6,6 +6,7 @@ export type InputsType = {
     title: string;
     type: 'string' | 'number';
     values: string | number;
+    setting: boolean;
 }
 
 type InputsBoxProps = {
@@ -58,14 +59,22 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
                                 className="flex w-full items-center justify-center rounded-3xl"
                                 style={{ backgroundColor: color.SecBtnColor }}
                             > */}
-                                <TextInput
-                                    keyboardType="default"
-                                    className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor"
-                                    
-                                    inputMode={item.type === 'number' ? 'numeric' : 'text'}
-                                    value={String(inputs[index].values)}
-                                    onChangeText={(text) => updateInput(index, text)}
-                                />
+                                {item.setting ? (
+                                    <TextInput
+                                        keyboardType="default"
+                                        className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor"
+                                        
+                                        inputMode={item.type === 'number' ? 'numeric' : 'text'}
+                                        value={String(inputs[index].values)}
+                                        onChangeText={(text) => updateInput(index, text)}
+                                    />
+                                ) : (
+                                    <Text
+                                        className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor px-4 py-2"
+                                    >
+                                        {String(inputs[index].values)}
+                                    </Text>
+                                )}
                             {/* </View> */}
                         </View>
                     </View>
