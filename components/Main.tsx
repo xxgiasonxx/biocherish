@@ -1,4 +1,4 @@
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Platform } from "react-native";
 // import { StyleSheet } from "react-native";
 import "../global.css"
 
@@ -9,6 +9,15 @@ type MainProps = {
 
 
 export function Main({ children, bgColor }: MainProps) {
+
+    if (Platform.OS === 'web') {
+        return (
+            <View style={{ flex: 1 }} className="flex flex-col items-center justify-center py-[1%] gap-[1%] bg-Background dark:bg-DarkBackground" >
+                {children}
+            </View>
+        );
+    }
+
     return (
         // <ScrollView contentContainerStyle={
         //     {
@@ -21,14 +30,15 @@ export function Main({ children, bgColor }: MainProps) {
         //     {children}
         // </View>
         // {/* </ScrollView> */}
-
         <ScrollView
             contentContainerStyle={{
+                // flexGrow: 1,
                 alignItems: 'center',
                 justifyContent: 'center',
                 paddingBottom: 100,
             }}
-            className="flex-1 flex-col bg-Background dark:bg-DarkBackground"
+            style={{ flex: 1 }}
+            className="bg-Background dark:bg-DarkBackground"
         >
             {children}
         </ScrollView>

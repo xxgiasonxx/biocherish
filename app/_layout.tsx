@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { ThemeProvider} from '@/components/providers/ThemeProviders';
 import { AuthProvider, useAuth } from '@/components/providers/AuthProviders';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { LoadingPage } from '@/app/LoadingPage';
 // import { View } from 'react-native';
 
 export default function App() {
@@ -19,6 +20,11 @@ export default function App() {
 }
 
 export const Layout = () => {
+  const { authState, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingPage />; // 或者返回一個加載指示器
+  }
 
   return (
     <>
@@ -28,36 +34,12 @@ export const Layout = () => {
           headerShown: false,
         }}
       >
-        <Content />
+        {authState?.authenticated ? (
+          <Stack.Screen name="(tabs)" />
+        ) : (
+          <Stack.Screen name="SignIn" />
+        )}
       </Stack>
     </>
-  );
-}
-
-
-const Content = () => {
-  const { authState, isLoading } = useAuth();
-  console.log("Layout authState:", authState?.authenticated);
-
-  if (isLoading) {
-    return (
-      <Stack.Screen name="Loading" options={{
-        headerShown: false
-      }} />
-    );
-  }
-
-  if (!authState?.authenticated) {
-    return (
-      <Stack.Screen name="SignIn" options={{
-        headerShown: false
-      }} />
-    );
-  }
-  
-  return (
-    <Stack.Screen name="(tabs)" options={{
-      headerShown: false
-    }} />
   );
 }

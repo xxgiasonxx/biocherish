@@ -28,8 +28,16 @@ export default function Layout() {
           title: '設定'
         }}
       />
-      {/* <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} /> */}
-      {/* <StatusBar style="auto" /> */}
+      <Stack.Screen name="notifications"
+        options={{
+          title: '通知設定'
+        }}
+      />
+      <Stack.Screen name="personal"
+        options={{
+          title: '個人設定'
+        }}
+      />
     </Stack>
   );
 }

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from 'expo-web-browser';
-
+import { Platform } from "react-native";
 import * as Linking from 'expo-linking';
 
 
@@ -22,7 +22,10 @@ interface AuthProps {
 
 const REFRESH_TOKEN_KEY = "refresh_token";
 const ACCESS_TOKEN_KEY = "access_token";
-export const API_URL = process.env.EXPO_PUBLIC_API_URL;
+export const API_URL = Platform.select({
+    web: process.env.EXPO_PUBLIC_WEB_API_URL,
+    default: process.env.EXPO_PUBLIC_API_URL,
+});
 const AuthContext = createContext<AuthProps>({});
 
 export const useAuth = () => {
@@ -46,10 +49,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         authenticated: false,
     });
 
+    const setToken = async (name: string, value: string) => {
+        if (Platform.OS === 'web') {
+            return localStorage.setItem(name, value);
+        }
+        return SecureStore.setItemAsync(name, value);
+    }
+
+    const getToken = async (name: string) => {
+        if (Platform.OS === 'web') {
+            return localStorage.getItem(name);
+        }
+        return SecureStore.getItemAsync(name);
+    }
+
+    const delToken = async (name: string) => {
+        if (Platform.OS === 'web') {
+            return localStorage.removeItem(name);
+        }
+        return SecureStore.deleteItemAsync(name);
+    }
+
     const performLogout = async () => {
         // 這裡只做客戶端清除，因為 token 失效了呼叫後端 logout 也會失敗
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+        await delToken(REFRESH_TOKEN_KEY);
+        await delToken(ACCESS_TOKEN_KEY);
         axios.defaults.headers.common['Authorization'] = '';
         setAuthState({
             access_token: null,
@@ -62,31 +86,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
 
+
+
     useEffect(() => {
         const loadTokens = async () => {
             setIsLoading(true);
-            const refresh_token = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-            const access_token = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+            const refresh_token = await getToken(REFRESH_TOKEN_KEY);
+            const access_token = await getToken(ACCESS_TOKEN_KEY);
             console.log("Loaded tokens:", { refresh_token, access_token });
 
-            axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-            // setAuthState({
-            //     access_token,
-            //     refresh_token,
-            //     authenticated: true,
-            // });
-            if (!authState.authenticated) {
+            if ( refresh_token && access_token ) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+                console.log("Setting auth state to authenticated");
                 setAuthState({
                     access_token,
                     refresh_token,
                     authenticated: true,
                 });
+            } else {
+                setAuthState({
+                    access_token: null,
+                    refresh_token: null,
+                    authenticated: false,
+                });
             }
-            console.log("Auth state after loading tokens:", authState);
             setIsLoading(false);
         }
         loadTokens();
-    }, [authState]);
+    }, []);
 
     useEffect(() => {
         const processQueue = (error: any, token: string | null = null) => {
@@ -128,7 +155,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     try {
                         // 1. 從 SecureStore 讀取最新的 Refresh Token
                         // (不要依賴 state，因為在 callback 中 state 可能是舊的)
-                        const currentRefreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+                        const currentRefreshToken = await getToken(REFRESH_TOKEN_KEY);
 
                         if (!currentRefreshToken) {
                             throw new Error("No refresh token available");
@@ -142,8 +169,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         const { access_token: newAccessToken, refresh_token: newRefreshToken } = response.data;
 
                         // 3. 更新 SecureStore
-                        await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, newAccessToken);
-                        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+                        await setToken(ACCESS_TOKEN_KEY, newAccessToken);
+                        await setToken(REFRESH_TOKEN_KEY, newRefreshToken);
 
                         // 4. 更新 Axios 全域 Header
                         axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
@@ -215,8 +242,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
 
-            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, response.data.refresh_token);
-            await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, response.data.access_token);
+            await setToken(REFRESH_TOKEN_KEY, response.data.refresh_token);
+            await setToken(ACCESS_TOKEN_KEY, response.data.access_token);
 
             return response;
 
@@ -227,8 +254,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const google_login = async () => {
         try {
+            const appRedirectUrl = Linking.createURL("/SignInSuccess");
             const response = await axios.get(
-                `${API_URL}/auth/google/login`, 
+                `${API_URL}/auth/google/login?app_redirect_url=${encodeURIComponent(appRedirectUrl)}`
             );
 
             if (response.status !== 200) {
@@ -238,7 +266,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             // 2. 使用 WebBrowser 開啟該 URL
             // 這會在 App 內彈出一個瀏覽器視窗
-            const result = await WebBrowser.openAuthSessionAsync(response.data.url, Linking.createURL("/"));
+            const result = await WebBrowser.openAuthSessionAsync(response.data.url, appRedirectUrl);
 
             console.log(result)
 
@@ -256,8 +284,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     authenticated: true,
                 });
                 axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-                await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh_token);
-                await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access_token);
+                await setToken(REFRESH_TOKEN_KEY, refresh_token);
+                await setToken(ACCESS_TOKEN_KEY, access_token);
             } else {
                 console.log("Google login cancelled or failed:", result);
             }
@@ -270,9 +298,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = async () => {
         try {
-            await axios.post(`${API_URL}/auth/logout`, {
-                refresh_token: authState.refresh_token,
-            });
+            const data = {
+                token: await getToken(REFRESH_TOKEN_KEY),
+            }
+            const response = await axios.post(`${API_URL}/auth/logout`, data);
+            
         } catch (e) {
             console.error("Logout API failed", e);
         } finally {
@@ -292,7 +322,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 authenticated: true,
             }); 
             axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
-            await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, response.data.access_token);
+            await setToken(ACCESS_TOKEN_KEY, response.data.access_token);
         } catch (e) {
             console.error("Token refresh failed", e);
             setAuthState({

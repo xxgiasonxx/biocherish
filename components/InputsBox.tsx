@@ -4,7 +4,7 @@ import { Box } from "@/components/Box";
 
 export type InputsType = {
     title: string;
-    type: 'string' | 'number';
+    type: 'string' | 'number' | 'password';
     values: string | number;
     setting: boolean;
 }
@@ -19,14 +19,23 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
     // 初始化 state
     const [inputs, setInputs] = useState<InputsType[]>(needed);
 
-    // 當輸入改變時回傳給父層
+    // 關鍵修正：監聽外部傳入的 needed，並同步到內部 state
+    useEffect(() => {
+        setInputs(needed);
+    }, [needed]);
+
+    // // 當輸入改變時回傳給父層
     useEffect(() => {
         onChange?.(inputs);
     }, [inputs, onChange]);
 
     const updateInput = (index: number, text: string) => {
         const newInputs = [...inputs];
-        newInputs[index] = { ...newInputs[index], values: typeof newInputs[index].values === 'number' ? Number(text) : text };
+        // 修正：應該根據 item.type 來判斷轉換類型，而不是根據當前的 values 類型
+        const currentItem = newInputs[index];
+        const newValue = currentItem.type === 'number' ? (Number(text) || 0) : text;
+        
+        newInputs[index] = { ...currentItem, values: newValue };
         setInputs(newInputs);
     };
 
@@ -41,7 +50,7 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
             </View>
 
             <View className="flex w-full flex-col items-start p-[2%] gap-3">
-                {needed.map((item, index) => (
+                {inputs.map((item, index) => (
                     <View
                         key={index}
                         className="flex-1 flex-row w-full items-start justify-start gap-4"
@@ -50,32 +59,29 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
                             <Text
                                 className="text-xl font-medium text-start text-TextColor dark:text-DarkTextColor"
                             >
-                               {item.title} 
+                                {item.title}
                             </Text>
                         </View>
 
                         <View className="flex-1 flex-row h-full items-center justify-start">
-                            {/* <View
-                                className="flex w-full items-center justify-center rounded-3xl"
-                                style={{ backgroundColor: color.SecBtnColor }}
-                            > */}
-                                {item.setting ? (
-                                    <TextInput
-                                        keyboardType="default"
-                                        className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor"
-                                        
-                                        inputMode={item.type === 'number' ? 'numeric' : 'text'}
-                                        value={String(inputs[index].values)}
-                                        onChangeText={(text) => updateInput(index, text)}
-                                    />
-                                ) : (
-                                    <Text
-                                        className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor px-4 py-2"
-                                    >
-                                        {String(inputs[index].values)}
-                                    </Text>
-                                )}
-                            {/* </View> */}
+                            {item.setting ? (
+                                <TextInput
+                                    keyboardType="default"
+                                    className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor"
+
+                                    inputMode={item.type === 'number' ? 'numeric' : 'text'}
+                                    secureTextEntry={item.type === 'password'}
+                                    placeholder={item.type === 'password' ? '********' : `請輸入${item.title.replace(':', '')}`}
+                                    value={String(inputs[index].values)}
+                                    onChangeText={(text) => updateInput(index, text)}
+                                />
+                            ) : (
+                                <Text
+                                    className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor px-4 py-2"
+                                >
+                                    {String(inputs[index].values)}
+                                </Text>
+                            )}
                         </View>
                     </View>
                 ))}

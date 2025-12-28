@@ -2,14 +2,56 @@ import { Icon, Label, NativeTabs, Badge, VectorIcon } from 'expo-router/unstable
 import React, { useContext } from 'react';
 // import { MaterialIcons } from '@expo/vector-icons';
 // import {S} from '@expo/vector-icons'
-import { FontAwesome6, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { ThemeContext } from '@/components/providers/ThemeProviders';
 import { Platform } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   const { color } = useContext(ThemeContext);
+
+  if (Platform.OS === 'web') {
+    return (
+  <Tabs
+    screenOptions={{
+      // tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      headerShown: false,
+      // tabBarButton: HapticTab,
+      tabBarStyle: {
+        backgroundColor: color.TabbarBg,
+      },
+      tabBarActiveTintColor: color.ActiveColor,
+      tabBarInactiveTintColor: color.TabbarColor,
+      tabBarLabelStyle: {
+        fontSize: 12,
+        fontWeight: '800',
+      },
+    }}>
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color }) => <MaterialIcons name="home" color={color} size={28} />,
+          }}
+        />
+        <Tabs.Screen
+          name="uploads"
+          options={{
+            title: 'Uploads',
+            tabBarIcon: ({ color }) => <MaterialIcons name="upload" color={color} size={28} />,
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+            tabBarIcon: ({ color }) => <MaterialIcons name="settings" color={color} size={28} />,
+          }}
+        />
+      </Tabs>
+    );
+  }
 
   return (
     <NativeTabs 
@@ -33,27 +75,24 @@ export default function TabLayout() {
 
       <NativeTabs.Trigger name='home'>
         <Label>home</Label>
-        {/* <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} drawable='ic_input_add' /> */}
-        {/* {
-          Platform.select({
-            ios: <Icon sf={{ default: 'house', selected: 'house.fill' }} />,
-            android: <MaterialIcons name='home' size={24} color={color.TabbarColor} />
-          })
-        } */}
-        <Icon sf={{ default: 'house', selected: 'house.fill' }} src={{ default: <VectorIcon family={MaterialIcons} name='home' />, selected: <VectorIcon family={MaterialIcons} name='home' /> }} />
+
+          <Icon sf={{ default: 'house', selected: 'house.fill' }} src={{ default: <VectorIcon family={MaterialIcons} name='home' />, selected: <VectorIcon family={MaterialIcons} name='home' /> }} />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name='uploads'>
         <Label>uploads</Label>
-        <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} drawable='ic_menu_report_image' />
+
+          <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} drawable='ic_menu_report_image' />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name='settings'>
         <Label>settings</Label>
-        <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} src={{ default: <VectorIcon family={MaterialIcons} name='settings' />, selected: <VectorIcon family={MaterialIcons} name='settings' /> }} />
+          <Icon sf={{ default: 'apple.image.playground', selected: 'apple.image.playground.fill' }} src={{ default: <VectorIcon family={MaterialIcons} name='settings' />, selected: <VectorIcon family={MaterialIcons} name='settings' /> }} />
       </NativeTabs.Trigger>
 
     </NativeTabs>
+
+
     // <Tabs
     //   screenOptions={{
     //     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
