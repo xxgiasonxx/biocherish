@@ -41,6 +41,7 @@ type ChoiceImageProps = {
 
 
 export function DisplayUpload({ name, displayState, bottleState, envState, oriimageUri, AIimageUri }: DisplayUploadProps) {
+    console.log(oriimageUri)
     const uri =  oriimageUri ?? 'https://placehold.co/600x400.png';
     const AIuri = AIimageUri ?? 'https://placehold.co/700x800.png';
 

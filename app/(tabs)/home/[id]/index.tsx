@@ -1,7 +1,6 @@
-import { useContext, useState, useEffect } from 'react';
-import { Text, View, Pressable, Platform } from 'react-native';
+import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
+import { Text, Pressable, Platform } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { ThemeContext } from '@/components/providers/ThemeProviders';
 import { Main } from '@/components/Main';
 import { Section } from '@/components/Section';
 import { SelectBar } from '@/components/SelectBar';
@@ -10,6 +9,7 @@ import { HistoryTable, HistoryItem } from '@/components/HistoryTable';
 import { InputsBox, InputsType } from '@/components/InputsBox';
 import axios from 'axios';
 import { LoadingPage } from '@/app/LoadingPage';
+
 
 // import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -24,10 +24,23 @@ function DetailPage() {
   const [selectedValue, setSelectedValue] = useState<number>(0);
   const page: string[] = ['最近上傳', '紀錄', '裝置設定'];
 
+  const recentUploadRef = useRef<{ refresh: () => Promise<void> } | null>(null);
+  const historyRef = useRef<{ refresh: () => Promise<void> } | null>(null);
+  const deviceSettingsRef = useRef<{ refresh: () => Promise<void> } | null>(null);
+
+  const onRefresh = async () => {
+    // 同時觸發所有子組件暴露出來的 refresh 函式
+    await Promise.all([
+      recentUploadRef.current?.refresh(),
+      historyRef.current?.refresh(),
+      deviceSettingsRef.current?.refresh()
+    ]);
+  };
+
 
   return (
     // <View className={`flex-1 bg-[${color.Background}] w-full justify-center items-center`}>
-    <Main>
+    <Main onRefresh={onRefresh}>
       <Section>
           {/* toggle bar*/}
          <SelectBar
@@ -35,55 +48,62 @@ function DetailPage() {
            onSelect={(value) => setSelectedValue(value)}
          />
 
-          {selectedValue === 0 && <RecentUpload id={id} url={`${API_URL}/bottle/${id}`} />}
-          {selectedValue === 1 && <History id={id} />}
-          {selectedValue === 2 && <DeviceSettings id={id} />}
+          {selectedValue === 0 && <RecentUpload ref={recentUploadRef} id={id} url={`${API_URL}/bottle/${id}`} />}
+          {selectedValue === 1 && <History ref={historyRef} id={id} />}
+          {selectedValue === 2 && <DeviceSettings ref={deviceSettingsRef} id={id} />}
       </Section>
     </Main>
   );
 };
 
-export function RecentUpload({ id, url }: { id: string, url: string }) {
+export const RecentUpload = forwardRef(({ id, url }: { id: string, url: string }, ref) => {
   const [displayState, setDisplayState] = useState<DisplayUploadProps | null>(null);
   const [loading, setLoading] = useState(true);
+
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(url);
+      if (response.status === 404) {
+        setDisplayState(null);
+        console.log('No bottle state found');
+        return;
+      }
+
+      if (response.status !== 200) {
+        console.error('Failed to fetch recent upload data:', response.status);
+        setDisplayState(null);
+        return;
+      }
+
+      const data = response.data;
+      console.log('Fetched recent upload data:', data);
+      const displayData: DisplayUploadProps = {
+        detect_state_id: data.detect_state_id,
+        name: data.name,
+        displayState: data.displayState,
+        bottleState: data.bottleState,
+        envState: data.envState,
+        oriimageUri: data.oriimageUri,
+        AIimageUri: data.AIimageUri,
+      };
+      setDisplayState(displayData);
+    } catch (error) {
+      console.error('Error in RecentUpload:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
   
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const response = await axios.get(url);
-        if (response.status === 404) {
-          setDisplayState(null);
-          console.log('No bottle state found');
-          return;
-        }
-
-        if (response.status !== 200) {
-          console.error('Failed to fetch recent upload data:', response.status);
-          setDisplayState(null);
-          return;
-        }
-        
-        const data = response.data;
-        const displayData: DisplayUploadProps = {
-          detect_state_id: data.detect_state_id,
-          name: data.name,
-          displayState: data.displayState,
-          bottleState: data.bottleState,
-          envState: data.envState,
-          oriimageUri: data.oriimageUri,
-          AIimageUri: data.AIimageUri,
-        };
-        setDisplayState(displayData);
-      } catch (error) {
-        console.error('Error in RecentUpload:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
     fetchData();
   }, [id]);
+
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchData
+  }));
 
   if (loading) {
     return <LoadingPage />;
@@ -96,67 +116,77 @@ export function RecentUpload({ id, url }: { id: string, url: string }) {
   return (
     <DisplayUpload {...displayState} />
   );
-}
+})
 
-function History({ id }: { id: string }) {
+export const History = forwardRef(({ id }: { id: string }, ref) => {
   const [testData, setTestData] = useState<HistoryItem[]>([]);
   const [totalPage, setTotalPage] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const maxItemsPerPage = 10;
 
-  useEffect(() => {
-    async function fetchTotalPages() {
-      setLoading(true);
-      try {
-        const response = await axios.get(`${API_URL}/bottle/${id}/total`);
-        if (response.status !== 200) {
-          console.error('Failed to fetch total history count:', response.status);
-          return;
-        }
-        const totalCount = response.data.total_scans;
-        setTotalPage(Math.ceil(totalCount / maxItemsPerPage));
-      } catch (error) {
-        console.error('Error in fetchTotalPages:', error);
-      } finally {
-        setLoading(false);
+
+  const fetchTotalPages = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/bottle/${id}/total`);
+      if (response.status !== 200) {
+        console.error('Failed to fetch total history count:', response.status);
+        return;
       }
+      const totalCount = response.data.total_scans;
+      setTotalPage(Math.ceil(totalCount / maxItemsPerPage));
+    } catch (error) {
+      console.error('Error in fetchTotalPages:', error);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  const fetchHistory = async () => {
+    setLoading(true);
+    const s = (currentPage - 1) * maxItemsPerPage;
+    const e = s + maxItemsPerPage;
+    try {
+      const response = await axios.get(`${API_URL}/bottle/${id}/history?s=${s}&e=${e}`);
+      if (response.status !== 200) {
+        console.error('Failed to fetch history data:', response.status);
+        return;
+      }
+      const data = response.data;
+      setTestData(data.history.map((item: any) => ({
+        id: item.id,
+        status: item.status,
+        status_text: item.status_text,
+        details: item.detail,
+        scanned_at: item.scanned_at,
+      })));
+    } catch (error) {
+      console.error('Error in fetchHistory:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     fetchTotalPages();
   }, [id, totalPage]);
 
+
   useEffect(() => {
-    async function fetchHistory() {
-      setLoading(true);
-      const s = (currentPage - 1) * maxItemsPerPage;
-      const e = s + maxItemsPerPage;
-      try {
-        const response = await axios.get(`${API_URL}/bottle/${id}/history?s=${s}&e=${e}`);
-        if (response.status !== 200) {
-          console.error('Failed to fetch history data:', response.status);
-          return;
-        }
-        const data = response.data;
-        setTestData(data.history.map((item: any) => ({
-          id: item.id,
-          status: item.status,
-          status_text: item.status_text,
-          details: item.detail,
-          scanned_at: item.scanned_at,
-        })));
-      } catch (error) {
-        console.error('Error in fetchHistory:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchHistory();
   }, [id, currentPage]);
 
+  useImperativeHandle(ref, () => ({
+    refresh: async () => {
+      await fetchTotalPages();
+      await fetchHistory();
+    }
+  }));
 
   if (loading) 
     return (
-      <Text>Loading...</Text>
+      <LoadingPage />
     );
 
   if (testData.length === 0)
@@ -167,9 +197,9 @@ function History({ id }: { id: string }) {
   return (
     <HistoryTable data={testData} totalPage={totalPage} maxItemsPerPage={maxItemsPerPage} currentPage={currentPage} setPage={setCurrentPage} />
   )
-}
+})
 
-function DeviceSettings({ id }: { id: string }) {
+const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
   const [inputs, setInputs] = useState<InputsType[]>([
     { title: '裝置ID:', type: 'number', values: '', setting: false },
     { title: '裝置名稱:', type: 'string', values: 'e04', setting: true},
@@ -177,28 +207,33 @@ function DeviceSettings({ id }: { id: string }) {
   ]);
 
 
-  useEffect(() => {
-    async function fetchDeviceSettings() {
-      try {
-        const response = await axios.post(`${API_URL}/device/getDevice`,
-          { bottle_id: id }
-        );
-        if (response.status !== 200) {
-          console.error('Failed to fetch device settings:', response.status);
-          return;
-        }
-        const data = response.data;
-        setInputs([
-          { title: '裝置ID:', type: 'number', values: data.device_id, setting: false },
-          { title: '裝置名稱:', type: 'string', values: data.name, setting: true},
-          { title: '每次拍攝時間:', type: 'number', values: data.detectFreq, setting: true },
-        ]);
-      } catch (error) {
-        console.error('Error in fetchDeviceSettings:', error);
+  const fetchDeviceSettings = async () => {
+    try {
+      const response = await axios.post(`${API_URL}/device/getDevice`,
+        { bottle_id: id }
+      );
+      if (response.status !== 200) {
+        console.error('Failed to fetch device settings:', response.status);
+        return;
       }
+      const data = response.data;
+      setInputs([
+        { title: '裝置ID:', type: 'number', values: data.device_id, setting: false },
+        { title: '裝置名稱:', type: 'string', values: data.name, setting: true },
+        { title: '每次拍攝時間:', type: 'number', values: data.detectFreq, setting: true },
+      ]);
+    } catch (error) {
+      console.error('Error in fetchDeviceSettings:', error);
     }
+  }
+
+  useEffect(() => {
     fetchDeviceSettings();
   }, [id]);
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchDeviceSettings
+  }));
 
   const changeSubmitHandle = async (newInputs: InputsType[]) => {
     try {
@@ -231,7 +266,7 @@ function DeviceSettings({ id }: { id: string }) {
       </Pressable>
     </>
   );
-}
+})
 
 
 

@@ -16,54 +16,37 @@ const API_URL = Platform.select({
 });
 
 
-
 function HomePage() {
   const [cardList, setCardList] = useState<CardProps[]>([]);
 
-  useEffect(() => {
-    const fetchCardList = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/bottle/`);
+  const fetchCardList = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/bottle/`);
 
-        if (response.status !== 200) {
-          console.error('Failed to fetch card list:', response.status);
-          return;
-        }
-
-        // response.data?.bottles?.forEach((bottle: CardProps) => {
-        //   setCardList(prevList => [...prevList, bottle]);
-        // });
-        setCardList(response.data?.bottles || []);
-
-
-      
-      } catch (error) {
-        console.error('Error in fetchCardList:', error);
+      if (response.status !== 200) {
+        console.error('Failed to fetch card list:', response.status);
+        return;
       }
-    };
+
+      // response.data?.bottles?.forEach((bottle: CardProps) => {
+      //   setCardList(prevList => [...prevList, bottle]);
+      // });
+      setCardList(response.data?.bottles || []);
+
+
+    
+    } catch (error) {
+      console.error('Error in fetchCardList:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchCardList();
   }, []);
 
-  // useEffect(() => {
-  //   setCardList([
-  //     {
-  //       id: '1',
-  //       name: '菌瓶 A',
-  //       bottle_status: 'good',
-  //       bottle_status_text: '一切正常',
-  //       env_status: "good",
-  //       env_status_text: 'dasjkda',
-  //       isConnected: true,
-  //       imageurl: 'https://placehold.co/600x400.png',
-  //       edited_at: 1711929600000,
-  //       scanned_at: 1712016000000,
-  //     },
-  //   ]);
-  // }, []);
-
   return (
     <>
-      <Main>
+      <Main onRefresh={fetchCardList}>
         <Section>
             {cardList.map((card, index) => (
               <Card key={index} {...card} />

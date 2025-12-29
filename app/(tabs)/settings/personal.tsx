@@ -43,24 +43,27 @@ function PersonalPage() {
         }
     }
 
+
+    const fetchUserData = async () => {
+        const response = await axios.get(`${API_URL}/auth/userinfo`);
+        const data = response.data;
+
+        console.log("Fetched user data:", data);
+        console.log(data.username, data.email);
+
+        setInputs([
+            { title: 'Username:', type: 'string', values: data['username'], setting: true },
+            { title: 'Email:', type: 'string', values: data['email'], setting: true },
+            { title: 'Password:', type: 'password', values: '', setting: true },
+            { title: 'Reset Password:', type: 'password', values: '', setting: true },
+        ]);
+    }
+
     useEffect(() => {
         // 假設這裡會從某個 API 獲取用戶資料並更新 inputs 狀態
-        const fetchUserData = async () => {
-            const response = await axios.get(`${API_URL}/auth/userinfo`);
-            const data = response.data;
-
-            console.log("Fetched user data:", data);
-            console.log(data.username, data.email);
-        
-            setInputs([
-                { title: 'Username:', type: 'string', values: data['username'], setting: true },
-                { title: 'Email:', type: 'string', values: data['email'], setting: true },
-                { title: 'Password:', type: 'password', values: '', setting: true },
-                { title: 'Reset Password:', type: 'password', values: '', setting: true },
-            ]);
-        }
         fetchUserData();
     }, []);
+
 
     const updateInfoHandle = async () => {
         try {
@@ -88,7 +91,7 @@ function PersonalPage() {
     }
 
     return (
-        <Main>
+        <Main onRefresh={fetchUserData}>
             <Section>
                 <InputsBox
                     BigTitle="個人資訊輸入"

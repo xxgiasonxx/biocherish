@@ -12,7 +12,7 @@ export default function App() {
     <ThemeProvider>
       <SafeAreaProvider>
         <AuthProvider>
-          <Layout />
+            <Layout />
         </AuthProvider>
       </SafeAreaProvider>
     </ThemeProvider>
