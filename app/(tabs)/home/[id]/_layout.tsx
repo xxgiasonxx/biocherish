@@ -48,7 +48,7 @@ export default function Layout() {
                 onPress={manual_device_capture}
                 className='mr-4 bg-Background dark:bg-DarkBackground p-2 rounded-2xl'
               >
-                <Text className='text-PrimaryBtnColor dark:text-DarkPrimaryBtnColor'>手動拍攝</Text>
+                <Text className='text-TextColor dark:text-DarkTextColor'>手動拍攝</Text>
               </Pressable>
             ),
           }}

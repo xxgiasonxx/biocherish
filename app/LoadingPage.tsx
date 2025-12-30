@@ -14,7 +14,7 @@ import taxiAnimationJSON from 'animations/biocherish.json';
 export function LoadingPage() {
 
     return (
-        <View className="flex-1 flex-col w-full h-full items-center justify-center" style={{ overflow: 'visible' }}>
+        <View className="flex-1 flex-col w-full h-full items-center justify-center bg-Background dark:bg-DarkBackground" style={{ overflow: 'visible' }}>
             {/* <View className="flex w-full h-[40%] flex-col items-center justify-center" style={{ overflow: 'visible' }}> */}
                 <LottieView
                     source={require('animations/biocherish.json')} // Use the imported JSON data

@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { Platform, Pressable, Text } from 'react-native';
 import { ThemeContext } from '@/components/providers/ThemeProviders';
 import axios from 'axios';
+import { StatusBar } from 'expo-status-bar';
 
 
 
@@ -43,6 +44,7 @@ export default function Layout() {
           title: '新增邊緣',
         }} />
       </Stack>
+      <StatusBar style="auto" />
     </>
   );
 }
