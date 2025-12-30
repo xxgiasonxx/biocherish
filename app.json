@@ -45,7 +45,7 @@
       },
       "edgeToEdgeEnabled": true,
       "usesCleartextTraffic": true,
-      "package": "com.yourname.projectname",
+      "package": "com.app.biocherish",
       "intentFilters": [
         {
           "action": "VIEW",

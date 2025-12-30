@@ -1,4 +1,4 @@
-import { Platform, View } from 'react-native';
+import { Platform, View, Text } from 'react-native';
 import { Main } from '@/components/Main';
 import { Section } from '@/components/Section';
 import { Card, CardProps } from '@/components/Card';
@@ -6,99 +6,82 @@ import { SymbolView } from 'expo-symbols';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router'
 import { cssInterop } from 'nativewind';
+import { useEffect, useState } from 'react';
+import { LoadingPage } from '@/app/LoadingPage';
+import axios from 'axios';
 
 
+const API_URL = Platform.select({
+  web: process.env.EXPO_PUBLIC_WEB_API_URL,
+  default: process.env.EXPO_PUBLIC_API_URL,
+});
 
-const cardList: CardProps[] = [
-  {
-    id: "1203982109318230918",
-    title: '菌瓶 A-01',
-    state: 'good',
-    stateText: '菌絲健康',
-    lastModified: '2025/10/25 下午 03:57',
-    lastDetected: '2025/10/25 下午 03:57',
-  },
-  {
-    id: "1203982109318230919",
-    title: '菌瓶 B-02',
-    state: 'careful',
-    stateText: '小心',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230920",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230921",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230922",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-  {
-    id: "1203982109318230923",
-    title: '菌瓶 B-03',
-    state: 'wrong',
-    stateText: '菌絲異常',
-    lastModified: '2025/10/24 下午 02:30',
-    lastDetected: '2025/10/24 下午 02:30',
-  },
-];
 
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// --- Main Component ---
 function HomePage() {
+  const [cardList, setCardList] = useState<CardProps[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchCardList = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/bottle/`);
+
+      if (response.status !== 200) {
+        console.error('Failed to fetch card list:', response.status);
+        return;
+      }
+
+      // response.data?.bottles?.forEach((bottle: CardProps) => {
+      //   setCardList(prevList => [...prevList, bottle]);
+      // });
+      setCardList(response.data?.bottles || []);
+
+
+    
+    } catch (error) {
+      console.error('Error in fetchCardList:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCardList();
+  }, []);
+
+  if (loading) {
+    return (
+      <LoadingPage />
+    );
+  }
 
   return (
-    // <View className={`flex-1 bg-[${color.Background}] w-full justify-center items-center`}>
-    // <SafeAreaView>
     <>
-      {/* <ScrollView
-      style={{ flex: 1}}
-       contentContainerStyle={
-        {
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingBottom: 100
-        }
-      }> */}
-
-        <Main>
-          <Section>
-              {cardList.map((card, index) => (
-                <Card key={index} id={card.id} title={card.title} state={card.state} stateText={card.stateText} lastModified={card.lastModified} lastDetected={card.lastDetected} />
-              ))}
-          </Section>
-        </Main>
+      <Main onRefresh={fetchCardList}>
+        <Section>
+            {cardList.map((card, index) => (
+              <Card key={index} {...card} />
+            ))}
+            {
+              cardList.length === 0 && (
+                <View className='flex items-center justify-center py-10'>
+                  <MaterialIcons name="cloud-off" size={50} className='text-TextIconColor dark:text-DarkTextIconColor mb-4' />
+                  <Text className='text-TextColor dark:text-DarkTextColor'>尚無任何菌瓶資料，請點擊右下角按鈕新增。</Text>
+                </View>
+              )
+            }
+        </Section>
+      </Main>
 
       {/* </ScrollView> */}
 
-      <View className='absolute right-2 bottom-[13vh] flex items-center justify-center gap-3'>
-        <View className='flex items-center justify-center rounded-3xl shadow-lg p-2 bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor'>
+      <View className='absolute right-2 md:right-8 bottom-[13vh] md:bottom-20 flex items-center justify-center gap-3'>
+
+        <Link href={"/home/newEdge"} className='flex items-center justify-center rounded-3xl shadow-lg p-2 md:p-3 cursor-pointer bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor hover:opacity-80 transition-opacity'>
           {Platform.select({
-            ios: <SymbolView name="plus" size={50} weight="bold" scale="large" className='text-TextIconColor dark:text-DarkTextIconColor' />,
-            android: <MaterialIcons name="integration-instructions" size={50} className='text-TextIconColor dark:text-DarkTextIconColor' />,
-          })}
-        </View>
-        <Link href={"/home/newEdge"} className='flex items-center justify-center rounded-3xl shadow-lg p-2 cursor-pointer bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor'>
-          {Platform.select({
-            ios: <SymbolView name="plus" size={50} weight="bold" scale="large" className='text-TextIconColor dark:text-DarkTextIconColor' />,
-            android: <MaterialCommunityIcons name="plus-circle-outline" size={50} className='text-TextIconColor dark:text-DarkTextIconColor' />,
+        ios: <SymbolView name="plus" size={50} weight="bold" scale="large" className='text-TextIconColor dark:text-DarkTextIconColor' />,
+        android: <MaterialCommunityIcons name="plus-circle-outline" size={50} className='text-TextIconColor dark:text-DarkTextIconColor' />,
+        web: <MaterialCommunityIcons name="plus-circle-outline" size={50} className='text-TextIconColor dark:text-DarkTextIconColor' />,
           })}
         </Link>
       </View>

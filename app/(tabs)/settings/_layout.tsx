@@ -1,3 +1,4 @@
+
 import { Stack } from 'expo-router';
 import { useContext } from 'react';
 import { ThemeContext } from '@/components/providers/ThemeProviders';
@@ -24,11 +25,19 @@ export default function Layout() {
 
       <Stack.Screen name="index"
         options={{
-          title: '手動上傳'
+          title: '設定'
         }}
       />
-      {/* <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} /> */}
-      {/* <StatusBar style="auto" /> */}
+      <Stack.Screen name="notifications"
+        options={{
+          title: '通知設定'
+        }}
+      />
+      <Stack.Screen name="personal"
+        options={{
+          title: '個人設定'
+        }}
+      />
     </Stack>
   );
 }

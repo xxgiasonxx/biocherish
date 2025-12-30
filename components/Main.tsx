@@ -1,55 +1,63 @@
-import { View, ScrollView } from "react-native";
-// import { StyleSheet } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import "../global.css"
+
 
 type MainProps = {
     children: React.ReactNode;
-    bgColor?: string;
+    onRefresh?: (() => Promise<void>) | Array<() => Promise<void>>;
 }
 
+export function Main({ children, onRefresh }: MainProps) {
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-export function Main({ children, bgColor }: MainProps) {
+    const handleRefresh = useCallback(async () => {
+        if (!onRefresh) return;
+
+        setIsRefreshing(true);
+
+        try {
+            if (Array.isArray(onRefresh)) {
+                // 使用 allSettled 確保所有 API 都執行完，即便其中一個噴錯
+                await Promise.allSettled(onRefresh.map(fn => typeof fn === 'function' ? fn() : null));
+            } else if (typeof onRefresh === 'function') {
+                await onRefresh();
+            }
+        } catch (error) {
+            console.error("Refresh Error:", error);
+        } finally {
+            // 延遲一點點關閉，視覺體驗較流暢
+            setTimeout(() => setIsRefreshing(false), 500);
+        }
+    }, [onRefresh]);
+
+    if (Platform.OS === 'web') {
+        return (
+            <View style={{ flex: 1 }} className="flex flex-col items-center justify-center py-[1%] gap-[1%] bg-Background dark:bg-DarkBackground" >
+                {children}
+            </View>
+        );
+    }
+
     return (
-        // <ScrollView contentContainerStyle={
-        //     {
-        //         alignItems: 'center',
-        //         justifyContent: 'center',
-        //         paddingBottom: 100
-        //     }
-        // }>
-        // <View className="flex-1 flex-col items-center justify-center py-[3%]" style={{ backgroundColor: bgColor }}>
-        //     {children}
-        // </View>
-        // {/* </ScrollView> */}
-
         <ScrollView
             contentContainerStyle={{
                 alignItems: 'center',
                 justifyContent: 'center',
                 paddingBottom: 100,
             }}
-            className="flex-1 flex-col bg-Background dark:bg-DarkBackground"
+            style={{ flex: 1 }}
+            className="bg-Background dark:bg-DarkBackground"
+            // 加入 RefreshControl
+            refreshControl={
+                <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={handleRefresh}
+                    title="更新中..."           // iOS 提示文字
+                />
+            }
         >
             {children}
         </ScrollView>
     );
 }
-
-// export function Main({ children, bgColor }: { children: React.ReactNode, bgColor?: string }) {
-//     return (
-//         <View style={[styles.container, { backgroundColor: bgColor }]}>
-//             {children}
-//         </View>
-//     );
-// }
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         flexDirection: 'column',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         paddingVertical: '1%',
-//         gap: '1%',
-//     },
-// });

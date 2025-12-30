@@ -29,15 +29,13 @@ export type fontType = {
 
 export type state = {
   good: string;
-  careful: string;
-  wrong: string;
+  warning: string;
   unknown: string;
 }
 
 export const States: state ={
   good: '#17cf1754',
-  careful: '#ffff0054',
-  wrong: '#ff000054',
+  warning: '#ff000054',
   unknown: '#80808054',
 };
 
