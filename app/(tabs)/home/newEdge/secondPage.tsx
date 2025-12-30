@@ -13,6 +13,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import axios from "axios";
 import { LoadingPage } from "@/app/LoadingPage";
+import { Section } from "@/components/Section";
+import { Main } from "@/components/Main";
 
 const API_URL = Platform.select({
     web: process.env.EXPO_PUBLIC_WEB_API_URL,
@@ -72,78 +74,81 @@ function SecondNewEdgePage() {
     }
 
     return (
-        <View className="flex-1 bg-Background dark:bg-DarkBackground px-6 py-8">
-            {/* Header Section */}
-            <View className="items-center mb-8">
-                <Text className="text-3xl font-bold text-TextColor dark:text-DarkTextColor text-center mb-3">
-                    🎉 裝置建立成功！🎉  
-                </Text>
-                <Text className="text-base text-TextColor dark:text-DarkTextColor text-center">
-                    請下載以下檔案並依照說明完成設定
-                </Text>
-            </View>
-
-            {/* Instructions Container */}
-            <View className="space-y-6 gap-3">
-                {/* BIN File Section */}
-                <View className="bg-Background dark:bg-DarkBackground rounded-3xl p-6 shadow-xl">
-                    <View className="flex-row items-center mb-3">
-                        <View className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center mr-3">
-                            <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">1</Text>
-                        </View>
-                        <Text className="text-xl font-bold text-TextColor dark:text-DarkTextColor">
-                            BIN 韌體檔案
+        <Main>
+            <Section>
+                <View className="flex-1 bg-Background dark:bg-DarkBackground px-6 py-8">
+                    {/* Header Section */}
+                    <View className="items-center mb-8">
+                        <Text className="text-3xl font-bold text-TextColor dark:text-DarkTextColor text-center mb-3">
+                            🎉 裝置建立成功！🎉
+                        </Text>
+                        <Text className="text-base text-TextColor dark:text-DarkTextColor text-center">
+                            請下載以下檔案並依照說明完成設定
                         </Text>
                     </View>
 
-                    <Text className="text-TextColor dark:text-DarkTextColor leading-6 mb-4">
-                        此檔案為裝置韌體，請下載並燒錄至您的 ESP32 裝置中。{'\n'}
-                        建議使用 <Text className="font-semibold text-blue-600 dark:text-blue-400" onPress={() => Linking.openURL('https://web.esphome.io/')}>https://web.esphome.io/</Text> 網站進行燒錄。
-                    </Text>
+                    {/* Instructions Container */}
+                    <View className="space-y-6 gap-3">
+                        {/* BIN File Section */}
+                        <View className="bg-Background dark:bg-DarkBackground rounded-3xl p-6 shadow-xl">
+                            <View className="flex-row items-center mb-3">
+                                <View className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center mr-3">
+                                    <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">1</Text>
+                                </View>
+                                <Text className="text-xl font-bold text-TextColor dark:text-DarkTextColor">
+                                    BIN 韌體檔案
+                                </Text>
+                            </View>
 
-                    <DownloadButton
-                        name="BIN 檔案"
-                        fileUrl={BinUri}
-                        fileName={`device_${deviceId}.bin`}
-                        token={authState?.access_token}
-                    />
-                </View>
+                            <Text className="text-TextColor dark:text-DarkTextColor leading-6 mb-4">
+                                此檔案為裝置韌體，請下載並燒錄至您的 ESP32 裝置中。{'\n'}
+                                建議使用 <Text className="font-semibold text-blue-600 dark:text-blue-400" onPress={() => Linking.openURL('https://web.esphome.io/')}>https://web.esphome.io/</Text> 網站進行燒錄。
+                            </Text>
 
-                {/* ZIP File Section */}
-                <View className="bg-Background dark:bg-DarkBackground rounded-3xl p-6 shadow-xl">
-                    <View className="flex-row items-center mb-3">
-                        <View className="w-10 h-10 bg-green-500 rounded-full items-center justify-center mr-3">
-                            <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">2</Text>
+                            <DownloadButton
+                                name="BIN 檔案"
+                                fileUrl={BinUri}
+                                fileName={`device_${deviceId}.bin`}
+                                token={authState?.access_token}
+                            />
                         </View>
-                        <Text className="text-xl font-bold text-TextColor dark:text-DarkTextColor">
-                            資源壓縮檔
-                        </Text>
+
+                        {/* ZIP File Section */}
+                        <View className="bg-Background dark:bg-DarkBackground rounded-3xl p-6 shadow-xl">
+                            <View className="flex-row items-center mb-3">
+                                <View className="w-10 h-10 bg-green-500 rounded-full items-center justify-center mr-3">
+                                    <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">2</Text>
+                                </View>
+                                <Text className="text-xl font-bold text-TextColor dark:text-DarkTextColor">
+                                    資源壓縮檔
+                                </Text>
+                            </View>
+
+                            <Text className="text-TextColor dark:text-DarkTextColor leading-6 mb-4">
+                                此檔案包含裝置所需的資源檔案，請下載並解壓縮後，透過 Arduino IDE 燒入至 ESP32 裝置中。
+                            </Text>
+
+                            <DownloadButton
+                                name="資源壓縮檔"
+                                fileUrl={ZipUri}
+                                fileName={`device_${deviceId}_resources.zip`}
+                                token={authState?.access_token}
+                            />
+                        </View>
                     </View>
 
-                    <Text className="text-TextColor dark:text-DarkTextColor leading-6 mb-4">
-                        此檔案包含裝置所需的資源檔案，請下載並解壓縮後，透過 Arduino IDE 燒入至 ESP32 裝置中。
-                    </Text>
-
-                    <DownloadButton
-                        name="資源壓縮檔"
-                        fileUrl={ZipUri}
-                        fileName={`device_${deviceId}_resources.zip`}
-                        token={authState?.access_token}
-                    />
+                    {/* 連線測試按鈕 */}
+                    <Pressable>
+                        <Text
+                            className="bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor text-TextColor dark:text-DarkTextColor font-bold text-center py-3 px-6 rounded-2xl mt-10"
+                            onPress={ConnectTextHandle}
+                        >
+                            測試裝置連線狀態
+                        </Text>
+                    </Pressable>
                 </View>
-            </View>
-            
-            {/* 連線測試按鈕 */}
-            <Pressable>
-                <Text
-                    className="bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor text-TextColor dark:text-DarkTextColor font-bold text-center py-3 px-6 rounded-2xl mt-10"
-                    onPress={ConnectTextHandle}
-                >
-                    測試裝置連線狀態
-                </Text>
-            </Pressable>
-
-        </View>
+            </Section>
+        </Main>
     );
 }
 
@@ -193,7 +198,7 @@ export function DownloadButton({ fileUrl, fileName, token, name }: DownloadButto
                 const { Directory, File, Paths } = (await import('expo-file-system/next')) as any;
 
                 const cacheDir = new Directory(Paths.cache, 'downloads');
-                
+
                 if (!cacheDir.exists) {
                     cacheDir.create();
                 }
@@ -226,9 +231,8 @@ export function DownloadButton({ fileUrl, fileName, token, name }: DownloadButto
     return (
         <Animated.View style={[animatedStyle]}>
             <Pressable
-                className={`px-6 py-4 rounded-2xl flex-row justify-center items-center ${
-                    isDownloading ? 'bg-gray-400' : 'bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor'
-                } active:opacity-80`}
+                className={`px-6 py-4 rounded-2xl flex-row justify-center items-center ${isDownloading ? 'bg-gray-400' : 'bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor'
+                    } active:opacity-80`}
                 onPress={handleDownload}
                 disabled={isDownloading}
             >
