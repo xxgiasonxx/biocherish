@@ -1,6 +1,6 @@
 import { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
-import { Text, Pressable, Platform } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Text, Pressable, Platform, Alert, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Main } from '@/components/Main';
 import { Section } from '@/components/Section';
 import { SelectBar } from '@/components/SelectBar';
@@ -51,6 +51,7 @@ function DetailPage() {
           {selectedValue === 0 && <RecentUpload ref={recentUploadRef} id={id} url={`${API_URL}/bottle/${id}`} />}
           {selectedValue === 1 && <History ref={historyRef} id={id} />}
           {selectedValue === 2 && <DeviceSettings ref={deviceSettingsRef} id={id} />}
+
       </Section>
     </Main>
   );
@@ -106,7 +107,11 @@ export const RecentUpload = forwardRef(({ id, url }: { id: string, url: string }
   }));
 
   if (loading) {
-    return <LoadingPage />;
+    return (
+      <View className="mt-[40%]">
+        <LoadingPage />
+      </View>
+    )
   }
 
   if (!displayState) {
@@ -184,10 +189,13 @@ export const History = forwardRef(({ id }: { id: string }, ref) => {
     }
   }));
 
-  if (loading) 
+  if (loading) {
     return (
-      <LoadingPage />
-    );
+      <View className="mt-[40%]">
+        <LoadingPage />
+      </View>
+    )
+  }
 
   if (testData.length === 0)
     return (
@@ -200,6 +208,8 @@ export const History = forwardRef(({ id }: { id: string }, ref) => {
 })
 
 const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState<InputsType[]>([
     { title: '裝置ID:', type: 'number', values: '', setting: false },
     { title: '裝置名稱:', type: 'string', values: 'e04', setting: true},
@@ -208,6 +218,7 @@ const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
 
 
   const fetchDeviceSettings = async () => {
+    setLoading(true);
     try {
       const response = await axios.post(`${API_URL}/device/getDevice`,
         { bottle_id: id }
@@ -224,6 +235,8 @@ const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
       ]);
     } catch (error) {
       console.error('Error in fetchDeviceSettings:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -236,6 +249,7 @@ const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
   }));
 
   const changeSubmitHandle = async (newInputs: InputsType[]) => {
+    setLoading(true);
     try {
       const response = await axios.put(`${API_URL}/device/updateDevice?device_id=${newInputs[0].values}&name=${newInputs[1].values}&freq=${newInputs[2].values}`);
 
@@ -250,7 +264,61 @@ const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
     } catch (error) {
       console.error('Error submitting device settings:', error);
       alert('儲存設定時發生錯誤，請稍後再試。');
+    } finally {
+      setLoading(false);
     }
+  }
+  const alertDelete = () => {
+    if (Platform.OS === 'web') {
+      const confirmDelete = window.confirm('確定要刪除此菌瓶及其裝置嗎？此操作無法復原。');
+      if (confirmDelete) {
+        deleteSubmitHandle();
+      }
+      return;
+    }
+    Alert.alert(
+      '確認刪除',
+      '確定要刪除此菌瓶及其裝置嗎？此操作無法復原。',
+      [
+        {
+          text: '取消',
+          style: 'cancel',
+        },
+        {
+          text: '刪除',
+          style: 'destructive',
+          onPress: () => deleteSubmitHandle(),
+        },
+      ],
+      { cancelable: true }
+    );
+  }
+
+  const deleteSubmitHandle = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.delete(`${API_URL}/bottle/${id}`);
+      if (response.status !== 200) {
+        console.error('Failed to delete device:', response.status);
+        alert('刪除失敗，請稍後再試。');
+        return;
+      }
+      alert('裝置及菌瓶已刪除！');
+      router.navigate('/(tabs)/home');
+    } catch (error) {
+      console.error('Error deleting device:', error);
+      alert('刪除裝置時發生錯誤，請稍後再試。');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <View className="mt-[40%]">
+        <LoadingPage />
+      </View>
+    )
   }
 
   return (
@@ -262,6 +330,15 @@ const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
       >
         <Text className='font-bold text-xl text-TextColor dark:text-DarkTextColor'>
           儲存設定
+        </Text>
+      </Pressable>
+
+      <Pressable
+        className='flex flex-row w-full items-center justify-center px-6 py-3 rounded-2xl gap-5 mt-4 bg-[#d84242] dark:bg-[#a83232]'
+        onPress={() => alertDelete()}
+      >
+        <Text className='font-bold text-xl text-TextColor dark:text-DarkTextColor'>
+          刪除菌瓶及裝置
         </Text>
       </Pressable>
     </>

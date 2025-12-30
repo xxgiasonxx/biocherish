@@ -7,6 +7,7 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router'
 import { cssInterop } from 'nativewind';
 import { useEffect, useState } from 'react';
+import { LoadingPage } from '@/app/LoadingPage';
 import axios from 'axios';
 
 
@@ -18,8 +19,10 @@ const API_URL = Platform.select({
 
 function HomePage() {
   const [cardList, setCardList] = useState<CardProps[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchCardList = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/bottle/`);
 
@@ -37,12 +40,20 @@ function HomePage() {
     
     } catch (error) {
       console.error('Error in fetchCardList:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchCardList();
   }, []);
+
+  if (loading) {
+    return (
+      <LoadingPage />
+    );
+  }
 
   return (
     <>

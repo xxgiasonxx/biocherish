@@ -12,20 +12,24 @@ import taxiAnimationJSON from 'animations/biocherish.json';
 
 
 export function LoadingPage() {
-    const { color } = useContext(ThemeContext);
 
     return (
-        <Main bgColor={color.Background}>
-            <Section>
-                <View className="flex w-full h-[40%] flex-col items-center justify-center">
-                    <LottieView
-                        source={taxiAnimationJSON} // Use the imported JSON data
-                        autoPlay // Automatically starts the animation
-                        loop // Loops the animation indefinitely
-                    />
-                </View>
-            </Section>
-        </Main>
+        <View className="flex-1 flex-col w-full h-full items-center justify-center" style={{ overflow: 'visible' }}>
+            {/* <View className="flex w-full h-[40%] flex-col items-center justify-center" style={{ overflow: 'visible' }}> */}
+                <LottieView
+                    source={require('animations/biocherish.json')} // Use the imported JSON data
+                    autoPlay // Automatically starts the animation
+                    loop // Loops the animation indefinitely
+                    style={{
+                        width: '50%',
+                        aspectRatio: 1, // 👈 如果動畫是正方形就設 1，長方形可試試 16/9
+                        marginBottom: '25%',
+                        overflow: 'visible',
+                    }}
+                    resizeMode="contain"
+                />
+            {/* </View> */}
+        </View>
     );
 }
 

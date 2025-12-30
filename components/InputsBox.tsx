@@ -56,7 +56,6 @@ export function InputsBox({ BigTitle, needed, onChange }: InputsBoxProps) {
                         <View className="flex-1 flex-row h-full items-center justify-start">
                             {item.setting ? (
                                 <TextInput
-                                    keyboardType="default"
                                     className="flex w-full items-center justify-center rounded-3xl text-center text-TextColor dark:text-DarkTextColor bg-SecBtnColor dark:bg-DarkSecBtnColor"
 
                                     inputMode={item.type === 'number' ? 'numeric' : 'text'}

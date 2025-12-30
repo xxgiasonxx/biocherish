@@ -6,6 +6,7 @@ import { Pressable, Text, Alert, Platform } from 'react-native';
 import { useAuth } from '@/components/providers/AuthProviders';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import { LoadingPage } from '@/app/LoadingPage';
 
 const API_URL = Platform.select({
     web: process.env.EXPO_PUBLIC_WEB_API_URL,
@@ -16,6 +17,7 @@ const API_URL = Platform.select({
 function PersonalPage() {
     const { onLogout } = useAuth();
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
     const [inputs, setInputs] = useState<InputsType[]>([
         { title: 'Username:', type: 'string', values: '', setting: true },
         { title: 'Email:', type: 'string', values: '', setting: true },
@@ -45,18 +47,25 @@ function PersonalPage() {
 
 
     const fetchUserData = async () => {
-        const response = await axios.get(`${API_URL}/auth/userinfo`);
-        const data = response.data;
+        setLoading(true);
+        try {
+            const response = await axios.get(`${API_URL}/auth/userinfo`);
+            const data = response.data;
 
-        console.log("Fetched user data:", data);
-        console.log(data.username, data.email);
+            console.log("Fetched user data:", data);
+            console.log(data.username, data.email);
 
-        setInputs([
-            { title: 'Username:', type: 'string', values: data['username'], setting: true },
-            { title: 'Email:', type: 'string', values: data['email'], setting: true },
-            { title: 'Password:', type: 'password', values: '', setting: true },
-            { title: 'Reset Password:', type: 'password', values: '', setting: true },
-        ]);
+            setInputs([
+                { title: 'Username:', type: 'string', values: data['username'], setting: true },
+                { title: 'Email:', type: 'string', values: data['email'], setting: true },
+                { title: 'Password:', type: 'password', values: '', setting: true },
+                { title: 'Reset Password:', type: 'password', values: '', setting: true },
+            ]);
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -66,6 +75,7 @@ function PersonalPage() {
 
 
     const updateInfoHandle = async () => {
+        setLoading(true);
         try {
             const data = {
                 Username: inputs[0].values,
@@ -87,7 +97,15 @@ function PersonalPage() {
         } catch (error) {
             console.error("Error updating user info:", error);
             Alert.alert("錯誤", "更新失敗，請稍後再試");
+        } finally {
+            setLoading(false);
         }
+    }
+
+    if (loading) {
+        return (
+            <LoadingPage />
+        );
     }
 
     return (

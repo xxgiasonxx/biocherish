@@ -5,6 +5,7 @@ import { Pressable, Text, Alert, Platform } from "react-native";
 import { InputsBox, InputsType } from "@/components/InputsBox";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import LoadingPage from "@/app/LoadingPage";
 
 const API_URL = Platform.select({
   web: process.env.EXPO_PUBLIC_WEB_API_URL,
@@ -12,6 +13,7 @@ const API_URL = Platform.select({
 });
 
 function NewEdgePage() {
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const [inputs, setInputs] = useState<InputsType[]>([
         { title: '裝置名稱:', type: 'string', values: '', setting: true },
@@ -21,6 +23,7 @@ function NewEdgePage() {
     ]);
 
     const SubmitDeviceNameHandle = async () => {
+        setIsLoading(true);
         try {
             if (inputs[0].values === '' || inputs[1].values === '' || inputs[2].values === '' || inputs[3].values === '') {
                 Alert.alert('錯誤', '請填寫所有欄位');
@@ -45,7 +48,15 @@ function NewEdgePage() {
         } catch (error) {
             console.error('Error submitting inputs:', error);
             Alert.alert('錯誤', '提交裝置資訊時發生錯誤，請稍後再試。');
+        } finally {
+            setIsLoading(false);
         }
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingPage />
+        )
     }
 
     return (
