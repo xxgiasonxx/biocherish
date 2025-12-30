@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, Alert, ActivityIndicator, Pressable, Linking, Platform } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import * as Sharing from 'expo-sharing';
 import { useAuth } from "@/components/providers/AuthProviders";
@@ -11,6 +11,8 @@ import Animated, {
   withTiming, 
   withSequence 
 } from 'react-native-reanimated';
+import axios from "axios";
+import { LoadingPage } from "@/app/LoadingPage";
 
 const API_URL = Platform.select({
     web: process.env.EXPO_PUBLIC_WEB_API_URL,
@@ -18,23 +20,65 @@ const API_URL = Platform.select({
 });
 
 function SecondNewEdgePage() {
+    const [loading, setLoading] = useState(false);
     const { deviceId } = useLocalSearchParams<{ deviceId: string }>();
     const { authState } = useAuth();
+    const router = useRouter();
     // const [fileOne, setFileOne] = useState<string | null>(null);
     // const [fileTwo, setFileTwo] = useState<string | null>(null);
     const BinUri = `${API_URL}/device/${deviceId}/bin`;
     const ZipUri = `${API_URL}/device/${deviceId}/zip`;
 
+    const ConnectTextHandle = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${API_URL}/device/${deviceId}/connect`);
+            if (response.status !== 200) {
+                if (Platform.OS === 'web') {
+                    alert('無法連線到裝置，請稍後再試。');
+                    return;
+                }
+                Alert.alert('錯誤', '無法連線到裝置，請稍後再試');
+                return;
+            }
+            if (response.data.isConnected !== true) {
+                if (Platform.OS === 'web') {
+                    alert('無法連線到裝置，請稍後再試。');
+                    return;
+                }
+                Alert.alert('錯誤', '無法連線到裝置，請稍後再試');
+                return;
+            }
+            if (Platform.OS === 'web') {
+                alert('已成功連線到裝置！');
+            } else {
+                Alert.alert('成功', '已成功連線到裝置！');
+            }
+            setTimeout(() => {
+                router.replace('/(tabs)/home');
+            }, 8000);
+        } catch (error) {
+            console.error('Error connecting to device:', error);
+            Alert.alert('錯誤', '連線到裝置時發生錯誤，請稍後再試。');
+        } finally {
+            setLoading(false);
+        }
+    }
 
+    if (loading) {
+        return (
+            <LoadingPage />
+        )
+    }
 
     return (
-        <View className="flex-1 bg-white dark:bg-gray-900 px-6 py-8">
+        <View className="flex-1 bg-Background dark:bg-DarkBackground px-6 py-8">
             {/* Header Section */}
             <View className="items-center mb-8">
                 <Text className="text-3xl font-bold text-TextColor dark:text-DarkTextColor text-center mb-3">
                     🎉 裝置建立成功！🎉  
                 </Text>
-                <Text className="text-base text-gray-600 dark:text-gray-400 text-center">
+                <Text className="text-base text-TextColor dark:text-DarkTextColor text-center">
                     請下載以下檔案並依照說明完成設定
                 </Text>
             </View>
@@ -45,14 +89,14 @@ function SecondNewEdgePage() {
                 <View className="bg-Background dark:bg-DarkBackground rounded-3xl p-6 shadow-xl">
                     <View className="flex-row items-center mb-3">
                         <View className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center mr-3">
-                            <Text className="text-white font-bold text-lg">1</Text>
+                            <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">1</Text>
                         </View>
                         <Text className="text-xl font-bold text-TextColor dark:text-DarkTextColor">
                             BIN 韌體檔案
                         </Text>
                     </View>
 
-                    <Text className="text-gray-700 dark:text-gray-300 leading-6 mb-4">
+                    <Text className="text-TextColor dark:text-DarkTextColor leading-6 mb-4">
                         此檔案為裝置韌體，請下載並燒錄至您的 ESP32 裝置中。{'\n'}
                         建議使用 <Text className="font-semibold text-blue-600 dark:text-blue-400" onPress={() => Linking.openURL('https://web.esphome.io/')}>https://web.esphome.io/</Text> 網站進行燒錄。
                     </Text>
@@ -69,14 +113,14 @@ function SecondNewEdgePage() {
                 <View className="bg-Background dark:bg-DarkBackground rounded-3xl p-6 shadow-xl">
                     <View className="flex-row items-center mb-3">
                         <View className="w-10 h-10 bg-green-500 rounded-full items-center justify-center mr-3">
-                            <Text className="text-white font-bold text-lg">2</Text>
+                            <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">2</Text>
                         </View>
                         <Text className="text-xl font-bold text-TextColor dark:text-DarkTextColor">
                             資源壓縮檔
                         </Text>
                     </View>
 
-                    <Text className="text-gray-700 dark:text-gray-300 leading-6 mb-4">
+                    <Text className="text-TextColor dark:text-DarkTextColor leading-6 mb-4">
                         此檔案包含裝置所需的資源檔案，請下載並解壓縮後，透過 Arduino IDE 燒入至 ESP32 裝置中。
                     </Text>
 
@@ -88,6 +132,16 @@ function SecondNewEdgePage() {
                     />
                 </View>
             </View>
+            
+            {/* 連線測試按鈕 */}
+            <Pressable>
+                <Text
+                    className="bg-PrimaryBtnColor dark:bg-DarkPrimaryBtnColor text-TextColor dark:text-DarkTextColor font-bold text-center py-3 px-6 rounded-2xl mt-10"
+                    onPress={ConnectTextHandle}
+                >
+                    測試裝置連線狀態
+                </Text>
+            </Pressable>
 
         </View>
     );
@@ -181,10 +235,10 @@ export function DownloadButton({ fileUrl, fileName, token, name }: DownloadButto
                 {isDownloading ? (
                     <View className="flex-row items-center">
                         <ActivityIndicator color="#fff" />
-                        <Text className="text-white font-bold ml-2">正在處理...</Text>
+                        <Text className="text-TextColor dark:text-DarkTextColor font-bold ml-2">正在處理...</Text>
                     </View>
                 ) : (
-                    <Text className="text-white font-bold text-lg">下載 {name}</Text>
+                    <Text className="text-TextColor dark:text-DarkTextColor font-bold text-lg">下載 {name}</Text>
                 )}
             </Pressable>
         </Animated.View>

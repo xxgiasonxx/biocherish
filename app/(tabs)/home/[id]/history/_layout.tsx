@@ -19,7 +19,6 @@ export default function Layout() {
     >
       <Stack.Screen name="[detect_record_id]" options={{
       }} />
-      <StatusBar style="auto" />
     </Stack>
   );
 }

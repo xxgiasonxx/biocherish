@@ -304,7 +304,7 @@ const DeviceSettings = forwardRef(({ id }: { id: string }, ref) => {
         return;
       }
       alert('裝置及菌瓶已刪除！');
-      router.navigate('/(tabs)/home');
+      router.back();
     } catch (error) {
       console.error('Error deleting device:', error);
       alert('刪除裝置時發生錯誤，請稍後再試。');

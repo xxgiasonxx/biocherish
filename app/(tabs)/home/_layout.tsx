@@ -44,7 +44,6 @@ export default function Layout() {
           title: '新增邊緣',
         }} />
       </Stack>
-      <StatusBar style="auto" />
     </>
   );
 }
