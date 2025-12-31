@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { TitleBar } from '@/components/TitleBar';
 import { BioState, BioStateType } from '@/components/BioState';
 import { formatDate } from '@/lib/time';
+import LoadingPage from '@/app/LoadingPage';
 
 
 export type DisplayUploadProps = {
@@ -13,6 +14,7 @@ export type DisplayUploadProps = {
     envState: EnvStateProps;
     oriimageUri?: string;
     AIimageUri?: string;
+    isError: boolean;
 }
 
 export type BottleStateProps = {
@@ -40,10 +42,11 @@ type ChoiceImageProps = {
 
 
 
-export function DisplayUpload({ name, displayState, bottleState, envState, oriimageUri, AIimageUri }: DisplayUploadProps) {
+export function DisplayUpload({ name, displayState, bottleState, envState, oriimageUri, AIimageUri, isError }: DisplayUploadProps) {
     console.log(oriimageUri)
     const uri =  oriimageUri ?? 'https://placehold.co/600x400.png';
     const AIuri = AIimageUri ?? 'https://placehold.co/700x800.png';
+
 
     return (
         <View 
@@ -56,10 +59,10 @@ export function DisplayUpload({ name, displayState, bottleState, envState, oriim
             <ChoiceImage uri={uri} AIuri={AIuri} />
 
             {/** bottle state */}
-            <DisplayEnvOrBottleState {...bottleState} />
+            <DisplayEnvOrBottleState {...bottleState} isError={isError} />
 
             {/** environment state */}
-            <DisplayEnvOrBottleState {...envState} />
+            <DisplayEnvOrBottleState {...envState} isError={isError} />
 
             {/** display state */}
             <DisplayState {...displayState} />
@@ -169,15 +172,15 @@ function ChoiceDisplayItem( item: {
 }
 
 
-function DisplayEnvOrBottleState(props: BottleStateProps | EnvStateProps) {
+function DisplayEnvOrBottleState(props: (BottleStateProps | EnvStateProps) & { isError: boolean }) {
 
     const choice: boolean = (props as BottleStateProps).bottle_status !== undefined;
 
     const title = choice ? '菌瓶' : '環境';
 
-    const status = choice ? (props as BottleStateProps).bottle_status : (props as EnvStateProps).env_status;
-    const status_text = choice ? (props as BottleStateProps).bottle_status_text : (props as EnvStateProps).env_status_text;
-    const description: string = choice ? (props as BottleStateProps).bottle_desc ?? '' : (props as EnvStateProps).env_desc ?? '';
+    const status: BioStateType = props.isError ? 'warning' : choice ? (props as BottleStateProps).bottle_status : (props as EnvStateProps).env_status;
+    const status_text = props.isError ? '錯誤' : choice ? (props as BottleStateProps).bottle_status_text : (props as EnvStateProps).env_status_text;
+    const description: string = props.isError ? '錯誤' : choice ? (props as BottleStateProps).bottle_desc ?? '' : (props as EnvStateProps).env_desc ?? '';
     const titleLists: {
         title: string,
         type: DisplayStateType,

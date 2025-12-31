@@ -88,6 +88,7 @@ export const RecentUpload = forwardRef(({ id, url }: { id: string, url: string }
         envState: data.envState,
         oriimageUri: data.oriimageUri,
         AIimageUri: data.AIimageUri,
+        isError: data.isError ?? false,
       };
       setDisplayState(displayData);
     } catch (error) {
